@@ -1,10 +1,9 @@
 import smtplib, ssl, sys
 
-sys.path.append('C:\\Users\\Erik Gabril\\eclipse-workspace\\MySQL_Python')
+sys.path.append('C:\\Users\\Erik Gabril\\Desktop\\MySQL_Python\\SQL_Python_Project\\testData.py')
 import datetime
 
-# import dataTest
-# from dataTest import getEmpEmail
+from testData import getEmpEmail
 #today = datetime.today().strftime('%Y-%m-%d')
 # today = today.split("-")
 
@@ -16,7 +15,7 @@ def connect():
     sender_email = "erikgsilva8@gmail.com"
     receiver_email = "expertgeneralservices@gmail.com"
     password = input("Type your password: ")
-    employee = "Michelle"
+    employee = getEmpEmail()
     week = datetime.date(2019, 5, 15).isocalendar()[1]
     print(week)
     message = """\
