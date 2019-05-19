@@ -1,8 +1,7 @@
 import sys
-
 sys.path.append('C:\\Users\\Erik Gabril\\Desktop\\MySQL_Python\\SQL_Python_Project\\eg_cleaning.py')
 
-from eg_cleaning import registerCustomer, postService, displayCustomers, displayEmployees
+from SQL_Python_Project.eg_cleaning import *
 
 def menu():
     load = True

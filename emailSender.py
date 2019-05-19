@@ -1,9 +1,9 @@
 import smtplib, ssl, sys
 
-sys.path.append('C:\\Users\\Erik Gabril\\Desktop\\MySQL_Python\\SQL_Python_Project\\testData.py')
+sys.path.append('C:\\Users\\Erik Gabril\\Desktop\\MySQL_Python\\SQL_Python_Project\\eg_cleaning')
 import datetime
 
-from testData import getEmpEmail
+from MySQL_Python.eg_cleaning import getEmpEmail
 #today = datetime.today().strftime('%Y-%m-%d')
 # today = today.split("-")
 
