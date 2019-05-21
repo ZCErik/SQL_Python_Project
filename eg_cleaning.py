@@ -42,7 +42,7 @@ def connect():
         #Validate if more than one customer with same name is found
         def getCustId():
             name = input("Search for customer: \n")
-            cur.execute("SELECT custId FROM Customer WHERE (CustFirstNam IN ('%s') OR CustLastNam IN ('%s'))" % (name, name))
+            cur.execute("SELECT custId FROM Customer WHERE CustFirstNam LIKE ('%%%s%%') or CustLastNam LIKE ('%%%s%%')" % (name, name))
             customers = cur.fetchall()
             customers = [ i[0] for i in customers ] #Clear ID numbers
 
@@ -64,7 +64,7 @@ def connect():
                 cust = cur.fetchone()
                 cust = cust[0] + " " +cust[1]
                 
-                return customers[customer]
+                return customer
             
             else:
                 return customers[0]
@@ -85,7 +85,7 @@ def connect():
         #Get EMPLOYEE ID by his/her name
         def getEmpId():
             emp = input("Search for employee: \n")
-            cur.execute("SELECT EmpId FROM Employee WHERE (EmpFirstNam IN ('%s') OR EmpLastNam IN ('%s'))" % (emp, emp))
+            cur.execute("SELECT EmpId FROM Employee WHERE (EmpFirstNam LIKE ('%%%s%%') OR EmpLastNam LIKE ('%%%s%%'))" % (emp, emp))
             empId = cur.fetchone()
             empId = empId[0]             
             return empId
@@ -106,7 +106,7 @@ def connect():
             received = 0
             invoiceDate = datetime.today().strftime('%Y-%m-%d')
             customer = customer_
-            paymentType = "E-Transfer"
+            paymentType = input("How the customer is paying?\n")
             
             records_to_insert = (invoiceId, customer, invoiceDate, paymentType, received)
 
@@ -114,13 +114,13 @@ def connect():
                 VALUES (%s,%s,%s,%s,%s) """
             
             cur.execute(sql_create_invoice, records_to_insert)
-            conn.commit()
+            return conn.commit()
             
         #Get next line to insert each Service in one unique line
         def getNextLine(invId):
             cur.execute("SELECT lineNo FROM serviceinvoices WHERE InvoiceId = %s ORDER BY lineNo DESC LIMIT 1" % (invId))
             lineNum = cur.fetchone()
-            if not lineNum:
+            if lineNum is None:
                 return 1
             else:
                 lineNum = lineNum[0] + 1
@@ -142,12 +142,13 @@ def connect():
             service = services[int(option)-1]
             return service
 
-        #Get the last invoice ID UNPAID for that specific customer
+        #Get the last invoice ID UNPAID for that specific customer, if DOES NOT EXIST, Open and insert a service to invoice
         def getOpenInvoice(customer):
             cur.execute("SELECT InvoiceID FROM Invoices WHERE Received = 0 AND Customer = %s ORDER BY 1 DESC LIMIT 1" % customer)
             invoice = cur.fetchone()
             if invoice is None:
                 createInvoice(customer)
+                getOpenInvoice(customer)
             else: 
                 invoice = invoice[0]
             return invoice
@@ -285,7 +286,8 @@ def connect():
                     print("Not working yet...")
                 elif selection == '6':
                     print("Set up a test first.")
-                    # getOpenInvoice(4).
+                    cust = getCustId()
+                    print(cust)
                 elif selection == '7':
                     print("Add any receipt here")
                     insertExpense()
