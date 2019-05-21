@@ -5,15 +5,15 @@ def connect():
     """ Connect to MySQL database """
 
     try:
-        # password = input("What is your password to connect to EG Cleaning?\n")
+        password = input("What is your password to connect to EG Cleaning?\n")
         conn = mysql.connector.connect(host='50.87.144.133',
                                        database='egcleani_EG_Cleaning',
                                        user='egcleani_erik',
-                                       password='Erik0408')
+                                       password=password)
         
         if conn.is_connected():
             print('Connected to MySQL database')
-            cur=conn.cursor() 
+            cur=conn.cursor()
 
         #Register Customer
         def registerCustomer():
@@ -62,7 +62,7 @@ def connect():
 
                 cur.execute("SELECT CustFirstNam, CustLastNam FROM Customer WHERE custId = '%s'" % customer)
                 cust = cur.fetchone()
-                cust = cust[0] + " " +cust[1]
+                cust = cust[0] + " " + cust[1]
                 
                 return customer
             
