@@ -114,7 +114,7 @@ def connect():
                 VALUES (%s,%s,%s,%s,%s) """
             
             cur.execute(sql_create_invoice, records_to_insert)
-            return conn.commit()
+            conn.commit()
             
         #Get next line to insert each Service in one unique line
         def getNextLine(invId):
@@ -147,11 +147,12 @@ def connect():
             cur.execute("SELECT InvoiceID FROM Invoices WHERE Received = 0 AND Customer = %s ORDER BY 1 DESC LIMIT 1" % customer)
             invoice = cur.fetchone()
             if invoice is None:
+                print("Creating new invoice...")
                 createInvoice(customer)
-                getOpenInvoice(customer)
+                return getOpenInvoice(customer)
             else: 
                 invoice = invoice[0]
-            return invoice
+                return invoice
 
         #If no date typed return todays date, else return dated typed
         def getDate():
@@ -241,9 +242,7 @@ def connect():
         #Menu to choose what to do
 
         #Get employee email
-        def getEmpEmail():
-            emp = getEmpId()
-
+        def getEmpEmail(emp):
             select_query = ("SELECT empEmail FROM Employee WHERE EmpId = %s" % emp)
             cur.execute(select_query)
             email = cur.fetchone()
