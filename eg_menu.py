@@ -1,7 +1,10 @@
 import sys
-sys.path.append('C:\\Users\\Erik Gabril\\Desktop\\MySQL_Python\\SQL_Python_Project\\eg_cleaning.py')
+sys.path.append('C:\\Users\\Erik Gabril\\Desktop\\MySQL_Python\\SQL_Python_Project\\queries')
 
-from SQL_Python_Project.eg_cleaning import *
+from queries import *
+# from eg_cleaning import postService
+# from eg_cleaning import displayCustomers
+# from eg_cleaning import displayEmployees
 
 def menu():
     load = True

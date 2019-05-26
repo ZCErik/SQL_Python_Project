@@ -1,20 +1,18 @@
+import sys
 import mysql.connector
 from datetime import datetime
 
-def connect():
-    """ Connect to MySQL database """
+sys.path.append('C:\\Users\\Erik Gabril\\Desktop\\MySQL_Python\\SQL_Python_Project\\login')
 
-    try:
-        password = input("What is your password to connect to EG Cleaning?\n")
-        conn = mysql.connector.connect(host='50.87.144.133',
-                                       database='egcleani_EG_Cleaning',
-                                       user='egcleani_erik',
-                                       password=password)
-         
-        if conn.is_connected():
-            print('Connected to MySQL database')
-            cur=conn.cursor()
-
+password = input("What is your password to connect to EG Cleaning?\n")
+conn = mysql.connector.connect(host='50.87.144.133',
+                                    database='egcleani_EG_Cleaning',
+                                    user='egcleani_erik',
+                                    password=password)
+try:
+    if conn.is_connected():
+        print('Connected to MySQL database')
+        cur=conn.cursor()
         #Register Customer
         def registerCustomer():
             firstName = input("First Name: ")
@@ -248,66 +246,12 @@ def connect():
             email = cur.fetchone()
             email = email[0]
             return email
+    
+except mysql.connector.Error as error : 
+    conn.rollback()
+    print("Failed to insert into MySQL table {}".format(error))
 
-        def menu():
-            load = True
-            menu = {}
-            menu[0] = "Exit"
-            menu[1] = "Add new customer" 
-            menu[2] = "Add new service"
-            menu[3] = "Display all customers"
-            menu[4] = "Display all employees"
-            menu[5] = "Send schedule"
-            menu[6] = "Tests"
-            menu[7] = "Add new expense"
-            
-            while load: 
-                options = menu.keys()
-
-                for entry in options: 
-                    print(entry, menu[entry])
-            
-                selection=input("Please Select:\n") 
-                if selection =='1': 
-                    print("========== Register new Customer ==========")
-                    registerCustomer()
-                elif selection == '2': 
-                    print("========== Register new Service ==========")
-                    postService()
-                elif selection == '3':
-                    print("Finding all customers...")
-                    displayCustomers()
-                elif selection == '4':
-                    print("Finding all Employees...")
-                    displayEmployees()
-                elif selection == '5':
-                    print("Send schedule...")
-                    print("Not working yet...")
-                elif selection == '6':
-                    print("Set up a test first.")
-                    cust = getCustId()
-                    print(cust)
-                elif selection == '7':
-                    print("Add any receipt here")
-                    insertExpense()
-                elif selection == '0':
-                    print("Goodbye...")
-                    load = False
-                else: 
-                    print("Invalid option!")
-
-        #call menu function to run the program
-        menu()
-
-    except mysql.connector.Error as error : 
-        conn.rollback()
-        print("Failed to insert into MySQL table {}".format(error))
-  
-    finally:
-        cur.close()
-        conn.close()
-        print("MySQL connection is closed")
-  
-if __name__ == '__main__':
-    connect()
-    print("End of Program")
+finally:
+    cur.close()
+    conn.close()
+    print("MySQL connection is closed")
