@@ -9,7 +9,7 @@ def connect():
         conn = mysql.connector.connect(host='50.87.144.133',
                                        database='egcleani_EG_Cleaning',
                                        user='egcleani_erik',
-                                       password=password)
+                                       password="Erik0408")
          
         if conn.is_connected():
             print('Connected to MySQL database')
