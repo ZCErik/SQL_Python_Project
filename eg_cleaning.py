@@ -1,20 +1,33 @@
 import mysql.connector
 from datetime import datetime
+from functions import getCustomerDetail
 
-def connect():
-    """ Connect to MySQL database """
+host = '50.87.144.133',
+database = 'egcleani_EG_Cleaning',
+user = 'egcleani_erik',
+password = "Erik0408"
+MySQLdb = mysql.connector
+
+try:
+    def connect():
+        """ Connect to MySQL database """
     try:
         # password = input("What is your password to connect to EG Cleaning?\n")
         conn = mysql.connector.connect(host='50.87.144.133',
                                        database='egcleani_EG_Cleaning',
                                        user='egcleani_erik',
                                        password="Erik0408")
-         
+
         if conn.is_connected():
             print('Connected to MySQL database')
-            cur=conn.cursor()
+            cur = conn.cursor()
 
-        #Register Customer
+        # Register Customer
+        cur.execute("SELECT `AUTO_INCREMENT` FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'egcleani_EG_Cleaning' AND TABLE_NAME = 'Customer'")
+        custId = cur.fetchone()
+        custId = custId[0]
+        getCustomerDetail(custId)
+
         def registerCustomer():
             firstName = input("First Name: ")
             cur.execute("SELECT `AUTO_INCREMENT` FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'egcleani_EG_Cleaning' AND TABLE_NAME = 'Customer'")
@@ -37,15 +50,15 @@ def connect():
             cur.execute(sql_insert_customer, records_to_insert)
             conn.commit()
 
-        #Get customer ID by his/her name (first or last)  
-        #Validate if more than one customer with same name is found
+        # Get customer ID by his/her name (first or last)  
+        # Validate if more than one customer with same name is found
         def getCustId():
             name = input("Search for customer: \n")
             cur.execute("SELECT custId FROM Customer WHERE CustFirstNam LIKE ('%%%s%%') or CustLastNam LIKE ('%%%s%%')" % (name, name))
             customers = cur.fetchall()
             customers = [ i[0] for i in customers ] #Clear ID numbers
 
-            #If more than 1 customer with same name, show all to user pick                    
+            # If more than 1 customer with same name, show all to user pick                    
             if len(customers) > 1:
                 i = 1
                 print("Which", name, "would you like to choose?")
@@ -55,7 +68,7 @@ def connect():
                     i += 1
                 
                 
-                #Loop to pick only valid data
+                # Loop to pick only valid data
                 option = input("Enter a valid option: \n")
                 customer = customers[int(option)-1]
 
@@ -68,7 +81,7 @@ def connect():
             else:
                 return customers[0]
 
-        #Insert POSTAL CODE
+        # Insert POSTAL CODE
         def insertPostal():
             zipCode = input("Please enter Postal Code: Eg. A1B 2C3\n")
             city = input("Please enter the City: \n")
@@ -81,7 +94,7 @@ def connect():
             conn.commit
             return zipCode
             
-        #Get EMPLOYEE ID by his/her name
+        # Get EMPLOYEE ID by his/her name
         def getEmpId():
             emp = input("Search for employee: \n")
             cur.execute("SELECT EmpId FROM Employee WHERE (EmpFirstNam LIKE ('%%%s%%') OR EmpLastNam LIKE ('%%%s%%'))" % (emp, emp))
@@ -89,7 +102,7 @@ def connect():
             empId = empId[0]             
             return empId
 
-        #Function to insert Services into Invoices   
+        # Function to insert Services into Invoices   
         def insertServiceInvoices(InvoiceId, lineNo, ServId, EmpId, ServiceDate, HourlyOfService, Notes):
             records_to_insert = (InvoiceId, lineNo, ServId, EmpId, ServiceDate, HourlyOfService, Notes)
             sql_insert_service = """ INSERT INTO `serviceinvoices` (InvoiceId, lineNo, ServId, EmpId, ServiceDate, HourlyOfService, Notes) 
@@ -97,7 +110,7 @@ def connect():
             cur.execute(sql_insert_service, records_to_insert)
             conn.commit
 
-        #Create an empty Invoice with today's date 
+        # Create an empty Invoice with today's date 
         def createInvoice(customer_):
             cur.execute("SELECT `AUTO_INCREMENT` FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'egcleani_EG_Cleaning' AND TABLE_NAME = 'Invoices'")
             invoiceId = cur.fetchone()
@@ -115,7 +128,7 @@ def connect():
             cur.execute(sql_create_invoice, records_to_insert)
             conn.commit()
             
-        #Get next line to insert each Service in one unique line
+        # Get next line to insert each Service in one unique line
         def getNextLine(invId):
             cur.execute("SELECT lineNo FROM serviceinvoices WHERE InvoiceId = %s ORDER BY lineNo DESC LIMIT 1" % (invId))
             lineNum = cur.fetchone()
@@ -125,7 +138,7 @@ def connect():
                 lineNum = lineNum[0] + 1
             return lineNum
 
-        #Get all Services IDs types of services provides? 
+        # Get all Services IDs types of services provides? 
         def getServId():
             cur.execute("SELECT ServId FROM Services")
             services = cur.fetchall()
@@ -136,12 +149,12 @@ def connect():
                 print(i, " - ", row)
                 i += 1
             
-            #Loop to pick only valid data
+            # Loop to pick only valid data
             option = input("Enter a valid option: \n")
             service = services[int(option)-1]
             return service
 
-        #Get the last invoice ID UNPAID for that specific customer, if DOES NOT EXIST, Open and insert a service to invoice
+        # Get the last invoice ID UNPAID for that specific customer, if DOES NOT EXIST, Open and insert a service to invoice
         def getOpenInvoice(customer):
             cur.execute("SELECT InvoiceID FROM Invoices WHERE Received = 0 AND Customer = %s ORDER BY 1 DESC LIMIT 1" % customer)
             invoice = cur.fetchone()
@@ -153,7 +166,7 @@ def connect():
                 invoice = invoice[0]
                 return invoice
 
-        #If no date typed return todays date, else return dated typed
+        # If no date typed return todays date, else return dated typed
         def getDate():
             today = input("Service provided in which date? ENTER FOR TODAY'S DATE\n")
             if not today:
@@ -161,7 +174,7 @@ def connect():
             else:
                 return today
             
-        #Insert a service into unpaid invoice
+        # Insert a service into unpaid invoice
         def postService():
             customer = getCustId()
             invoice = getOpenInvoice(customer)
@@ -176,7 +189,7 @@ def connect():
             insertServiceInvoices(invoice, line, service, emp, servDate, hoursWorked, note)
             conn.commit()
             
-        #Insert receipt expenses into MySQL
+        # Insert receipt expenses into MySQL
         def insertExpense():
             cur.execute("SELECT `AUTO_INCREMENT` FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'egcleani_EG_Cleaning' AND TABLE_NAME = 'expenses'")
             expId = cur.fetchone()
@@ -214,7 +227,7 @@ def connect():
             cur.execute(sql_insert_expense, records_to_insert)
             conn.commit()
 
-        #Get all customers
+        # Get all customers
         def displayCustomers():
             select_query = ("SELECT * FROM Customer")
             cur.execute(select_query)
@@ -227,7 +240,7 @@ def connect():
                 
                 print(row[0], "\t", row[1], row[2].ljust(25), row[3].ljust(30), row[4].ljust(20), row[6].ljust(25), row[8])
                 
-        #Get all employees
+        # Get all employees
         def displayEmployees():
             select_query = ("SELECT * FROM Employee")
             cur.execute(select_query)
@@ -238,9 +251,9 @@ def connect():
             print("ID:\t", "Name:\t\t\t\t", "Address:\t\t\t", "Phone:\t\t\t", "Email:\t\t", )
             for row in customers:
                 print(row[0], "\t", row[1], row[2].ljust(25), row[3].ljust(30), row[4].ljust(20), row[6].ljust(25))  
-        #Menu to choose what to do
+        # Menu to choose what to do
 
-        #Get employee email
+        # Get employee email
         def getEmpEmail(emp):
             select_query = ("SELECT empEmail FROM Employee WHERE EmpId = %s" % emp)
             cur.execute(select_query)
@@ -295,7 +308,7 @@ def connect():
                 else: 
                     print("Invalid option!")
 
-        #call menu function to run the program
+        # call menu function to run the program
         menu()
 
     except mysql.connector.Error as error : 
@@ -306,7 +319,17 @@ def connect():
         cur.close()
         conn.close()
         print("MySQL connection is closed")
-  
+
+except MySQLdb.OperationalError:
+    self.connection = MySQLdb.connect(
+        self.host,
+        self.user,
+        self.password,
+        self.database)
+    # reconnect your cursor as you did in __init__ or wherever    
+    self.cursor = self.connection(
+        MySQLdb.cursors.DictCursor)  
+
 if __name__ == '__main__':
     connect()
     print("End of Program")

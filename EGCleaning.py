@@ -1,12 +1,13 @@
-
 import mysql.connector
+from functions_SQL import *
+
 from datetime import datetime
 
 def connect():
     """ Connect to MySQL database """
 
     try:
-        password = input("What is your password to connect to EG Cleaning?\n")
+        # password = input("What is your password to connect to EG Cleaning?\n")
         conn = mysql.connector.connect(host='50.87.144.133',
                                        database='egcleani_EG_Cleaning',
                                        user='egcleani_erik',
@@ -14,30 +15,30 @@ def connect():
          
         if conn.is_connected():
             print('Connected to MySQL database')
-            cur=conn.cursor()
+            cur = conn.cursor()
 
         #Register Customer
-        def registerCustomer():
-            firstName = input("First Name: ")
+        def register_customer():
+
             cur.execute("SELECT `AUTO_INCREMENT` FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'egcleani_EG_Cleaning' AND TABLE_NAME = 'Customer'")
             custId = cur.fetchone()
             custId = custId[0]
             print(custId)
-            lastName = input("Last Name: ")
-            street = input("Street address: ")
-            phone = input("Phone Number: ")
+
+            customer = get_customer_details(custId)
+
             postalCode = insertPostal()
-            email = input("Email: ")
-            note = input("Notes: ")
-            ref = input("Referral: ")
+
             
-            records_to_insert = (custId, firstName, lastName, street, phone, postalCode, email, note, ref)
+            records_to_insert = (custId, customer, postalCode)
             
             sql_insert_customer = """ INSERT INTO Customer (`custId`, `CustFirstNam`, `CustLastNam`, `custStreet`, `custPhone`, `custPostalCode`, `custEmail`, `Notes`, `referral`)
                 VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s) """
-            
-            cur.execute(sql_insert_customer, records_to_insert)
-            conn.commit()
+
+            print(records_to_insert, sql_insert_customer)
+
+            # cur.execute(sql_insert_customer, records_to_insert)
+            # conn.commit()
 
         #Get customer ID by his/her name (first or last)  
         #Validate if more than one customer with same name is found
@@ -72,16 +73,12 @@ def connect():
 
         #Insert POSTAL CODE
         def insertPostal():
-            zipCode = input("Please enter Postal Code: Eg. A1B 2C3\n")
-            city = input("Please enter the City: \n")
-            region = input("Please enter the Region: \n")
-            
-            recordsToInsert = (zipCode, city, region)
+            records_to_insert = get_postal_code_details()
             sql_insert_postal = ("INSERT INTO `ZipCode` (`PostalCode`, `PostalCity`, `PostalRegion`) VALUES (%s, %s, %s)")
-            
-            cur.execute(sql_insert_postal, recordsToInsert)
+
+            cur.execute(sql_insert_postal, records_to_insert)
             conn.commit
-            return zipCode
+            print("Postal Coded added to the database")
             
         #Get EMPLOYEE ID by his/her name
         def getEmpId():
@@ -286,7 +283,7 @@ def connect():
                     print("Not working yet...")
                 elif selection == '6':
                     print("Set up a test first.")
-                    cust = getCustId()
+                    cust = register_customer()
                     print(cust)
                 elif selection == '7':
                     print("Add any receipt here")
